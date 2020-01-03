@@ -1,0 +1,12 @@
+#! /bin/sh
+
+BASE='https://www.youtube.com/results?search_query='
+if [ "${1}x" = '-vx' ]
+then
+	shift
+	ARGS=''
+else
+	ARGS='--no-vid'
+fi
+exec mpv ${ARGS} "${BASE}$(echo $@ | sed 's/ /+/g')"
+
