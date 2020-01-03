@@ -1,0 +1,27 @@
+#! /bin/sh
+
+TS=$(date +%s)
+RC_PATH="/etc/s6-rc"
+COMPIELD="${RC_PATH}/compiled"
+COMPIELD_NEW="${COMPIELD}${TS}"
+SRC="${RC_PATH}/source"
+
+function die () {
+	echo "$@" >&2
+	exit 1
+}
+
+echo "Compiling ${SRC} to ${COMPIELD_NEW}"
+s6-rc-compile "${COMPIELD_NEW}" "${SRC}" \
+|| die "Cannot compile ${SRC}"
+
+if [ -e "${COMPIELD}" ]
+then
+	echo "Update db from ${COMPIELD_NEW}"
+	s6-rc-update "${COMPIELD_NEW}" \
+	|| die "Cannot update new db ${COMPIELD_NEW}"
+fi
+
+echo "Switching symlink"
+ln -snf "${COMPIELD_NEW}" "${COMPIELD}" \
+|| die "Cannot update the symlink"
