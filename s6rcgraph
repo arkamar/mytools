@@ -2,6 +2,7 @@
 
 import os
 import pprint
+import sys
 
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
 
@@ -19,6 +20,9 @@ def get_dependencies(rc_type, dir_name):
         ret = f.read().strip().split('\n')
         f.close()
     return ret
+
+if len(sys.argv) == 2:
+    os.chdir(sys.argv[1])
 
 for dir_name in os.listdir('.'):
     if dir_name[0] == '.':
