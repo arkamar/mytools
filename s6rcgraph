@@ -6,14 +6,7 @@ import sys
 
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
 
-def get_type(dir_name):
-    f = open(dir_name + '/type', 'r')
-    ret = f.read().strip()
-    f.close()
-    return ret
-
-def get_dependencies(rc_type, dir_name):
-    path = dir_name + ('/dependencies', '/contents')[(rc_type == 'bundle')]
+def get_content(path):
     ret = None
     if os.path.isfile(path):
         f = open(path, 'r')
@@ -21,16 +14,31 @@ def get_dependencies(rc_type, dir_name):
         f.close()
     return ret
 
+def get_type(dir_name):
+    return get_content(dir_name + '/type')[0]
+
+def get_dependencies(rc_type, dir_name):
+    return get_content(dir_name + ('/dependencies', '/contents')[(rc_type == 'bundle')])
+
+def get_consumers(dir_name):
+    return get_content(dir_name + '/consumer-for')
+
 if len(sys.argv) == 2:
     os.chdir(sys.argv[1])
+
+pipes = []
 
 for dir_name in os.listdir('.'):
     if dir_name[0] == '.':
         continue
     rc_type = get_type(dir_name)
     hm[rc_type] += [{ dir_name: get_dependencies(rc_type, dir_name)}]
+    consumers = get_consumers(dir_name)
+    if consumers:
+        pipes += [{ dir_name: consumers }]
 
 #pprint.pprint(hm)
+#pprint.pprint(pipes)
 
 print("digraph G {")
 print("\tnode [ shape = box ]")
@@ -57,4 +65,13 @@ for i in hm:
                 for l in j[k]:
                     if len(l):
                         print('\t"' + k + '" -> "' + l + '"')
+
+print("\tsubgraph log {")
+print("\t\tedge [ color = blue, style = dotted ]")
+for i in pipes:
+    for j in i:
+        for k in i[j]:
+            print('\t\t"' + k + '" -> "' + j + '"')
+print("\t}")
+
 print("}")
