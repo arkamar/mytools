@@ -1,0 +1,56 @@
+#! /bin/env python
+
+import os
+import pprint
+
+hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
+
+def get_type(dir_name):
+    f = open(dir_name + '/type', 'r')
+    ret = f.read().strip()
+    f.close()
+    return ret
+
+def get_dependencies(rc_type, dir_name):
+    path = dir_name + ('/dependencies', '/contents')[(rc_type == 'bundle')]
+    ret = None
+    if os.path.isfile(path):
+        f = open(path, 'r')
+        ret = f.read().strip().split('\n')
+        f.close()
+    return ret
+
+for dir_name in os.listdir('.'):
+    if dir_name[0] == '.':
+        continue
+    rc_type = get_type(dir_name)
+    hm[rc_type] += [{ dir_name: get_dependencies(rc_type, dir_name)}]
+
+#pprint.pprint(hm)
+
+print("digraph G {")
+print("\tnode [ shape = box ]")
+
+print("\tsubgraph bundle {")
+print("\t\tnode [ color = orange ]")
+for j in hm['bundle']:
+    for k in j:
+        print('\t\t"' + k + '"')
+print("\t}")
+
+print("\tsubgraph longrun {")
+print("\t\tnode [ color = red ]")
+for j in hm['longrun']:
+    for k in j:
+        print('\t\t"' + k + '"')
+print("\t}")
+for i in hm:
+#    if i == 'bundle':
+#        continue
+    for j in hm[i]:
+        for k in j:
+            if j[k]:
+                for l in j[k]:
+                    if len(l):
+                        print('\t"' + k + '" -> "' + l + '"')
+print("}")
