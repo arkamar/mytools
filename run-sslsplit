@@ -1,0 +1,39 @@
+#! /bin/sh
+
+DIR='/tmp/sslsplit'
+TS="$(date +%s)"
+
+mkdir -p ${DIR}/${TS}.{cont,crts}
+cd "${DIR}"
+
+if [ ! -e ca.key ]
+then
+	openssl genrsa -out ca.key 2048
+fi
+
+if [ ! -e ca.crt ]
+then
+	cat > x509v3ca.cnf <<EOF
+[ req ]
+distinguished_name = reqdn
+
+[ reqdn ]
+
+[ v3_ca ]
+basicConstraints        = CA:TRUE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer:always
+EOF
+
+	openssl req -new -nodes -x509 -sha256 -out ca.crt -key ca.key\
+		-config x509v3ca.cnf -extensions v3_ca \
+		-subj '/O=SSLsplit Root CA/CN=SSLsplit Root CA/' \
+		-set_serial 0 -days 3650
+fi
+
+sslsplit -k ca.key -c ca.crt \
+	-l "${DIR}/${TS}.log" \
+	-S "${DIR}/${TS}.cont" \
+	-w "${DIR}/${TS}.crts" \
+	https 10.10.10.1 10443 \
+	http  10.10.10.1 10080
