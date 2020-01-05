@@ -6,11 +6,6 @@ source /etc/portage/make.conf
 
 : ${PORTAGE_NICENESS?=0}
 
-if [ -n "${MAKEOPTS}" ]
-then
-	export MAKEOPTS
-fi
-
 LINUX_BUILD='/var/tmp/portage/linux'
 LINUX_CFG="${LINUX_BUILD}/.config"
 
@@ -27,7 +22,7 @@ then
 fi
 
 function call_linux_make() {
-	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" "${@}"
+	nice -n ${PORTAGE_NICENESS} make ${MAKEOPTS} O="${LINUX_BUILD}" "${@}"
 }
 
 if [ ! -e "${LINUX_CFG}.old" ]
