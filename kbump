@@ -26,23 +26,18 @@ then
 	zcat "/proc/config.gz" > "${LINUX_CFG}"
 fi
 
+function call_linux_make() {
+	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" "${@}"
+}
+
 if [ ! -e "${LINUX_CFG}.old" ]
 then
 	echo Regenerating configuration
-	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" oldconfig
+	call_linux_make oldconfig
 fi
 
-if [ "${1}" = menuconfig ]
-then
-	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" menuconfig
-fi
-
-if [ "${1}" = build ]
-then
-	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}"
-fi
-
-if [ "${1}" = install ]
-then
-	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" install
-fi
+case "${1}"
+in
+	build) call_linux_make ;;
+	*) call_linux_make "${@}" ;;
+esac
