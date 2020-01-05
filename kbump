@@ -4,6 +4,8 @@ set -e
 
 source /etc/portage/make.conf
 
+: ${PORTAGE_NICENESS?=0}
+
 if [ -n "${MAKEOPTS}" ]
 then
 	export MAKEOPTS
@@ -27,20 +29,20 @@ fi
 if [ ! -e "${LINUX_CFG}.old" ]
 then
 	echo Regenerating configuration
-	nice -n10 make O="${LINUX_BUILD}" oldconfig
+	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" oldconfig
 fi
 
 if [ "${1}" = menuconfig ]
 then
-	nice -n10 make O="${LINUX_BUILD}" menuconfig
+	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" menuconfig
 fi
 
 if [ "${1}" = build ]
 then
-	nice -n10 make O="${LINUX_BUILD}"
+	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}"
 fi
 
 if [ "${1}" = install ]
 then
-	nice -n10 make O="${LINUX_BUILD}" install
+	nice -n ${PORTAGE_NICENESS} make O="${LINUX_BUILD}" install
 fi
