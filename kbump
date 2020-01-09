@@ -9,6 +9,16 @@ source /etc/portage/make.conf
 LINUX_BUILD='/var/tmp/portage/linux'
 LINUX_CFG="${LINUX_BUILD}/.config"
 
+function get_src() {
+	echo /usr/src/linux-* \
+	| xargs -n1 \
+	| sort -r \
+	| head -n1
+}
+
+SRC_DIR="$(get_src)"
+cd "${SRC_DIR}"
+
 if [ ! -e "${LINUX_BUILD}" ]
 then
 	echo Creating build directory
