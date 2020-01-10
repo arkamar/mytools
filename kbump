@@ -12,7 +12,7 @@ LINUX_CFG="${LINUX_BUILD}/.config"
 function get_src() {
 	echo /usr/src/linux-* \
 	| xargs -n1 \
-	| sort -r \
+	| sort -rV \
 	| head -n1
 }
 
