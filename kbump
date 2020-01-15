@@ -4,8 +4,8 @@ set -e
 
 source /etc/portage/make.conf
 
-: ${PORTAGE_NICENESS?=0}
-: ${LINUX_BUILD?='/var/tmp/portage/linux'}
+: ${PORTAGE_NICENESS:=0}
+: ${LINUX_BUILD:='/var/tmp/portage/linux'}
 
 LINUX_CFG="${LINUX_BUILD}/.config"
 
