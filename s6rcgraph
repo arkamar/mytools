@@ -51,19 +51,18 @@ for directory in direcotires:
 print("digraph G {")
 print("\tnode [ shape = box ]")
 
-print("\tsubgraph bundle {")
-print("\t\tnode [ color = orange ]")
-for j in hm['bundle']:
-    for k in j:
-        print('\t\t"' + k + '"')
-print("\t}")
+def print_svc_type_subgraph(svc_type, color):
+    print("\tsubgraph {} {{".format(svc_type))
+    print("\t\tnode [ color = {} ]".format(color))
+    for j in hm[svc_type]:
+        for k in j:
+            print('\t\t"' + k + '"')
+    print("\t}")
 
-print("\tsubgraph longrun {")
-print("\t\tnode [ color = red ]")
-for j in hm['longrun']:
-    for k in j:
-        print('\t\t"' + k + '"')
-print("\t}")
+print_svc_type_subgraph('bundle', 'orange')
+print_svc_type_subgraph('longrun', 'red')
+print_svc_type_subgraph('oneshot', 'black')
+
 for i in hm:
 #    if i == 'bundle':
 #        continue
