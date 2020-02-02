@@ -5,6 +5,7 @@ import pprint
 import sys
 
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
+pipes = []
 
 def get_content(path):
     ret = None
@@ -23,19 +24,26 @@ def get_dependencies(rc_type, dir_name):
 def get_consumers(dir_name):
     return get_content(dir_name + '/consumer-for')
 
-if len(sys.argv) == 2:
-    os.chdir(sys.argv[1])
+def process_path(path):
+    global pipes
+    for dir_name in os.listdir(path):
+        full_path = path + "/" + dir_name
+        if dir_name[0] == '.':
+            continue
+        rc_type = get_type(full_path)
+        hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path)}]
+        consumers = get_consumers(full_path)
+        if consumers:
+            pipes += [{ dir_name: consumers }]
 
-pipes = []
+if len(sys.argv) == 1:
+    print("usage: s6rcgraph source...")
+    sys.exit(1)
 
-for dir_name in os.listdir('.'):
-    if dir_name[0] == '.':
-        continue
-    rc_type = get_type(dir_name)
-    hm[rc_type] += [{ dir_name: get_dependencies(rc_type, dir_name)}]
-    consumers = get_consumers(dir_name)
-    if consumers:
-        pipes += [{ dir_name: consumers }]
+direcotires = sys.argv[1:]
+
+for directory in direcotires:
+    process_path(directory)
 
 #pprint.pprint(hm)
 #pprint.pprint(pipes)
