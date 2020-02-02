@@ -4,16 +4,19 @@ TS=$(date +%s)
 RC_PATH="/etc/s6-rc"
 COMPIELD="${RC_PATH}/compiled"
 COMPIELD_NEW="${COMPIELD}${TS}"
-SRC="${RC_PATH}/source"
+SRC=(
+	"${RC_PATH}/source/base"
+	"${RC_PATH}/source/$(hostname)"
+)
 
 function die () {
 	echo "$@" >&2
 	exit 1
 }
 
-echo "Compiling ${SRC} to ${COMPIELD_NEW}"
-s6-rc-compile "${COMPIELD_NEW}" "${SRC}" \
-|| die "Cannot compile ${SRC}"
+echo "Compiling ${SRC[@]} to ${COMPIELD_NEW}"
+s6-rc-compile "${COMPIELD_NEW}" "${SRC[@]}" \
+|| die "Cannot compile ${SRC[@]}"
 
 if [ -e "${COMPIELD}" ]
 then
