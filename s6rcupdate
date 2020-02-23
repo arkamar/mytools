@@ -1,5 +1,12 @@
 #! /bin/sh
 
+CONFIG="/etc/s6rcupdate.conf"
+
+if [ -r "${CONFIG}" ]
+then
+	source "${CONFIG}"
+fi
+
 TS=$(date +%s)
 RC_PATH="/etc/s6-rc"
 COMPIELD="${RC_PATH}/compiled"
@@ -9,14 +16,16 @@ SRC=(
 	"${RC_PATH}/source/$(hostname)"
 )
 
+: ${S6_RC_SRC:="${SRC[@]}"}
+
 function die () {
 	echo "$@" >&2
 	exit 1
 }
 
-echo "Compiling ${SRC[@]} to ${COMPIELD_NEW}"
-s6-rc-compile "${COMPIELD_NEW}" "${SRC[@]}" \
-|| die "Cannot compile ${SRC[@]}"
+echo "Compiling ${S6_RC_SRC[@]} to ${COMPIELD_NEW}"
+s6-rc-compile "${COMPIELD_NEW}" "${S6_RC_SRC[@]}" \
+|| die "Cannot compile ${S6_RC_SRC[@]}"
 
 if [ -e "${COMPIELD}" ]
 then
