@@ -9,12 +9,6 @@ source /etc/portage/make.conf
 
 LINUX_CFG="${LINUX_BUILD}/.config"
 
-if [ -n "${INSTALL_PATH}" ]
-then
-	echo "Kernel will be installed to: ${INSTALL_PATH}"
-	export INSTALL_PATH
-fi
-
 function get_src() {
 	echo /usr/src/linux-* \
 	| xargs -n1 \
@@ -25,6 +19,12 @@ function get_src() {
 SRC_DIR="$(get_src)"
 echo "Selected sources: $(basename ${SRC_DIR})"
 cd "${SRC_DIR}"
+
+if [ -n "${INSTALL_PATH}" ]
+then
+	echo "Kernel will be installed to: ${INSTALL_PATH}"
+	export INSTALL_PATH
+fi
 
 if [ ! -e "${LINUX_BUILD}" ]
 then
