@@ -43,7 +43,11 @@ if len(sys.argv) == 1:
 direcotires = sys.argv[1:]
 
 for directory in direcotires:
-    process_path(directory)
+    try:
+        process_path(directory)
+    except:
+        print("problem in \"{}\" directory".format(directory))
+        raise
 
 #pprint.pprint(hm)
 #pprint.pprint(pipes)
