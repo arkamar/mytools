@@ -1,0 +1,29 @@
+#! /bin/sh
+
+VALUE="${1}"
+
+function show_values() {
+	local max=$(cat "${policy}/cpuinfo_max_freq")
+	local min=$(cat "${policy}/cpuinfo_min_freq")
+	local smax=$(cat "${policy}/scaling_max_freq")
+	local smin=$(cat "${policy}/scaling_min_freq")
+	local scur=$(cat "${policy}/scaling_cur_freq")
+	printf "%8s: %7u %7u %7u %7u %7u\n" $policy $min $max $smin $smax $scur
+}
+
+cd '/sys/devices/system/cpu/cpufreq'
+
+if [ -z "${VALUE}" ]
+then
+	printf "%8s: %7s %7s %7s %7s %7s\n" policy min max smin smax scur
+fi
+
+for policy in *
+do
+	if [ -z "${VALUE}" ]
+	then
+		show_values
+	else
+		echo -n "${VALUE}" > "${policy}/scaling_max_freq" || echo "Cannot set max freq to: '${VALUE}'" >&2
+	fi
+done
