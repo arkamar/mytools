@@ -1,6 +1,7 @@
 #! /bin/sh
 
-BASE='https://www.youtube.com/results?search_query='
+BASE='https://www.youtube.com'
+SEARCH="${BASE}/results?search_query="
 if [ "${1}x" = '-vx' ]
 then
 	shift
@@ -8,5 +9,11 @@ then
 else
 	ARGS='--no-vid'
 fi
-exec mpv ${ARGS} "${BASE}$(echo $@ | sed 's/ /+/g')"
 
+function get_video_links() {
+	curl "${SEARCH}$(echo $@ | sed 's/ /+/g')" \
+	| grep -o '/watch?v=[^"]\+' \
+	| sed "s#.*#${BASE}&#"
+}
+
+exec mpv ${ARGS} $(get_video_links "${@}")
