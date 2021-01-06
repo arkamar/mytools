@@ -13,6 +13,9 @@ fi
 function get_video_links() {
 	curl "${SEARCH}$(echo $@ | sed 's/ /+/g')" \
 	| grep -o '/watch?v=[^"]\+' \
+	| sed 's:\\u0026:\&:g' \
+	| sed '/list=/s:.*\(list=.*\):/playlist?\1:' \
+	| uniq \
 	| sed "s#.*#${BASE}&#"
 }
 
