@@ -16,7 +16,7 @@ function get_src() {
 	| head -n1
 }
 
-SRC_DIR="$(get_src)"
+: ${SRC_DIR:="$(get_src)"}
 echo "Selected sources: $(basename ${SRC_DIR})"
 cd "${SRC_DIR}"
 
