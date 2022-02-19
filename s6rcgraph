@@ -31,7 +31,7 @@ def process_path(path):
         if dir_name[0] == '.':
             continue
         rc_type = get_type(full_path)
-        hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path)}]
+        hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path) or []}]
         consumers = get_consumers(full_path)
         if consumers:
             pipes += [{ dir_name: consumers }]
@@ -72,10 +72,9 @@ for svc_type in hm:
 #        continue
     for services in hm[svc_type]:
         for service in services:
-            if services[service]:
-                for dependency in services[service]:
-                    if len(dependency):
-                        print('\t"' + service + '" -> "' + dependency + '"')
+            for dependency in services[service]:
+                if len(dependency):
+                    print('\t"' + service + '" -> "' + dependency + '"')
 
 print("\tsubgraph log {")
 print("\t\tedge [ color = blue, style = dotted ]")
