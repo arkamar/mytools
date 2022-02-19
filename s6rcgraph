@@ -70,11 +70,11 @@ print("digraph G {")
 print("\tnode [ shape = box ]")
 
 def print_svc_type_subgraph(svc_type, color):
-    print("\tsubgraph {} {{".format(svc_type))
-    print("\t\tnode [ color = {} ]".format(color))
+    print(f'\tsubgraph {svc_type} {{')
+    print(f'\t\tnode [ color = {color} ]')
     for service in hm[svc_type]:
         for service_name in service:
-            print('\t\t"' + service_name + '"')
+            print(f'\t\t"{service_name}"')
     print("\t}")
 
 print_svc_type_subgraph('bundle', 'orange')
