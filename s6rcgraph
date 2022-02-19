@@ -9,6 +9,8 @@ print_clusters = False
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
 pipes = []
 clusters = {}
+all_services = set()
+known_services = set()
 
 def get_content(path):
     ret = None
@@ -35,9 +37,13 @@ def process_path(path):
         full_path = path + "/" + dir_name
         if dir_name[0] == '.':
             continue
+        known_services.add(dir_name)
         clusters.get(cluster_name).append(dir_name)
         rc_type = get_type(full_path)
-        hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path) or []}]
+        dependencies = get_dependencies(rc_type, full_path) or []
+        for dependency in dependencies:
+            all_services.add(dependency)
+        hm[rc_type] += [{ dir_name: dependencies}]
         consumers = get_consumers(full_path)
         if consumers:
             pipes += [{ dir_name: consumers }]
@@ -72,6 +78,13 @@ def print_svc_type_subgraph(svc_type, color):
 print_svc_type_subgraph('bundle', 'orange')
 print_svc_type_subgraph('longrun', 'red')
 print_svc_type_subgraph('oneshot', 'black')
+
+unknown_services = all_services - known_services
+print('\tsubgraph unknonw {')
+print("\t\tnode [ color = gray, fontcolor = darkgray ]")
+for service in unknown_services:
+    print('\t\t"' + service + '"')
+print("\t}")
 
 if print_clusters:
     for cluster in clusters:
