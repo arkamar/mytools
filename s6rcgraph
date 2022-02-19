@@ -4,8 +4,11 @@ import os
 import pprint
 import sys
 
+print_clusters = False
+
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
 pipes = []
+clusters = {}
 
 def get_content(path):
     ret = None
@@ -26,10 +29,13 @@ def get_consumers(dir_name):
 
 def process_path(path):
     global pipes
+    cluster_name = os.path.basename(path)
+    clusters.update({cluster_name: []})
     for dir_name in os.listdir(path):
         full_path = path + "/" + dir_name
         if dir_name[0] == '.':
             continue
+        clusters.get(cluster_name).append(dir_name)
         rc_type = get_type(full_path)
         hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path) or []}]
         consumers = get_consumers(full_path)
@@ -66,6 +72,15 @@ def print_svc_type_subgraph(svc_type, color):
 print_svc_type_subgraph('bundle', 'orange')
 print_svc_type_subgraph('longrun', 'red')
 print_svc_type_subgraph('oneshot', 'black')
+
+if print_clusters:
+    for cluster in clusters:
+        cluster_dot_name = cluster.replace('.', '_')
+        print(f'\tsubgraph cluster_{cluster_dot_name} {{')
+        print(f'\t\t label = "{cluster}"')
+        for service in clusters[cluster]:
+            print(f'\t\t"{service}"')
+        print('\t}')
 
 for svc_type in hm:
 #    if svc_type == 'bundle':
