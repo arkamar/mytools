@@ -18,6 +18,8 @@ def get_content(path):
         f = open(path, 'r')
         ret = f.read().strip().split('\n')
         f.close()
+        if len(ret) == 1 and ret[0] == '':
+            ret = None
     return ret
 
 def get_type(dir_name):
