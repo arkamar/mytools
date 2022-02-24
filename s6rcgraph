@@ -4,8 +4,13 @@ import os
 import pprint
 import sys
 
+print_clusters = False
+
 hm = { 'bundle':[], 'longrun':[], 'oneshot':[] }
 pipes = []
+clusters = {}
+all_services = set()
+known_services = set()
 
 def get_content(path):
     ret = None
@@ -13,6 +18,8 @@ def get_content(path):
         f = open(path, 'r')
         ret = f.read().strip().split('\n')
         f.close()
+        if len(ret) == 1 and ret[0] == '':
+            ret = None
     return ret
 
 def get_type(dir_name):
@@ -26,12 +33,19 @@ def get_consumers(dir_name):
 
 def process_path(path):
     global pipes
+    cluster_name = os.path.basename(path)
+    clusters.update({cluster_name: []})
     for dir_name in os.listdir(path):
         full_path = path + "/" + dir_name
         if dir_name[0] == '.':
             continue
+        known_services.add(dir_name)
+        clusters.get(cluster_name).append(dir_name)
         rc_type = get_type(full_path)
-        hm[rc_type] += [{ dir_name: get_dependencies(rc_type, full_path)}]
+        dependencies = get_dependencies(rc_type, full_path) or []
+        for dependency in dependencies:
+            all_services.add(dependency)
+        hm[rc_type] += [{ dir_name: dependencies}]
         consumers = get_consumers(full_path)
         if consumers:
             pipes += [{ dir_name: consumers }]
@@ -56,26 +70,41 @@ print("digraph G {")
 print("\tnode [ shape = box ]")
 
 def print_svc_type_subgraph(svc_type, color):
-    print("\tsubgraph {} {{".format(svc_type))
-    print("\t\tnode [ color = {} ]".format(color))
-    for j in hm[svc_type]:
-        for k in j:
-            print('\t\t"' + k + '"')
+    print(f'\tsubgraph {svc_type} {{')
+    print(f'\t\tnode [ color = {color} ]')
+    for service in hm[svc_type]:
+        for service_name in service:
+            print(f'\t\t"{service_name}"')
     print("\t}")
 
 print_svc_type_subgraph('bundle', 'orange')
 print_svc_type_subgraph('longrun', 'red')
 print_svc_type_subgraph('oneshot', 'black')
 
-for i in hm:
-#    if i == 'bundle':
+unknown_services = all_services - known_services
+print('\tsubgraph unknonw {')
+print("\t\tnode [ color = gray, fontcolor = darkgray ]")
+for service in unknown_services:
+    print('\t\t"' + service + '"')
+print("\t}")
+
+if print_clusters:
+    for cluster in clusters:
+        cluster_dot_name = cluster.replace('.', '_')
+        print(f'\tsubgraph cluster_{cluster_dot_name} {{')
+        print(f'\t\t label = "{cluster}"')
+        for service in clusters[cluster]:
+            print(f'\t\t"{service}"')
+        print('\t}')
+
+for svc_type in hm:
+#    if svc_type == 'bundle':
 #        continue
-    for j in hm[i]:
-        for k in j:
-            if j[k]:
-                for l in j[k]:
-                    if len(l):
-                        print('\t"' + k + '" -> "' + l + '"')
+    for services in hm[svc_type]:
+        for service in services:
+            for dependency in services[service]:
+                if len(dependency):
+                    print('\t"' + service + '" -> "' + dependency + '"')
 
 print("\tsubgraph log {")
 print("\t\tedge [ color = blue, style = dotted ]")
